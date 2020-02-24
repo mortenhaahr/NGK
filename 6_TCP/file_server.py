@@ -7,11 +7,9 @@ import sys
 from socket import *
 from lib import Lib
 
-
 HOST = '10.0.0.1'
 PORT = 9000
 BUFSIZE = 1000
-
 
 def main(argv):
 	# TO DO Your Code
@@ -34,28 +32,23 @@ def main(argv):
 		while True:
 			connectionSocket, address = serverSocket.accept()
 			print "Connected from", address
-			# loop serving the new client
-			# sentence = connectionSocket.recv(100).decode() [Next line is function from lib.py - read whole string]
-
 			sentence = Lib.readTextTCP(connectionSocket)
 			print "Client beder om: ", sentence
-
 			file_name = Lib.extractFilename(sentence)
-
-
-			file_size = Lib.check_File_Exists(file_name)
-			print "Filen findes da!"
-			print "Filen fylder: ", file_size
+			print "Filnavn: ", file_name
+			file_size = Lib.check_File_Exists(sentence)
 
 			if file_size !=0:
-				sendFile(file_name, file_size, connectionSocket)
+				print "Filen findes!"
+				print "Filen fylder: ", file_size
 
-				Lib.writeTextTCP("Filen er sendt du!", connectionSocket)
+				Lib.writeTextTCP(str(file_size), connectionSocket)
+
+				sendFile(sentence, file_size, connectionSocket)
 				print "Filen er sendt!"
 
 			else:
-				print "Kuk kuk lille fil eller er den bare tom?"
-
+				print "Kuk kuk - tom fil eller er den bare tom?"
 				Lib.writeTextTCP("Ingen fil..", connectionSocket)
 
 			connectionSocket.close()
@@ -67,17 +60,25 @@ def main(argv):
 def sendFile(fileName,  fileSize,  conn):
 	# TO DO Your Code
 	Lib.writeTextTCP("Sender Fil...", conn)
-	
+	filepoint = 1
 	file = open(fileName, 'rb')
-	filepoint = file.read(BUFSIZE)
+	sizeLeft = fileSize
 
-	while(filepoint):
-		conn.send(filepoint)
-		filepoint = file.read(BUFSIZE)
+	while(sizeLeft > 0):
+		if sizeLeft < BUFSIZE:
+			Lib.writeTextTCP(str(sizeLeft),conn)
+			filepoint = file.read(sizeLeft)
+		
+		else:
+			Lib.writeTextTCP(str(BUFSIZE), conn)
+			filepoint = file.read(BUFSIZE)
+		
 		print "Sender...."
+		conn.send(filepoint)
+		sizeLeft = sizeLeft - BUFSIZE
+	
+	Lib.writeTextTCP('0',conn)
 	file.close()
 
-
-   
 if __name__ == "__main__":
 	main(sys.argv[1:])
