@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#Help: https://pythontic.com/modules/socket/udp-client-server-example
+
 import sys
 from socket import *
 from lib import Lib
@@ -9,7 +11,7 @@ PORT = 9000
 BUFSIZE = 1024
 
 def main(argv):
-	
+
 	# Create a UDP socket
 	serverSocket = socket(AF_INET,SOCK_DGRAM)
 
@@ -31,14 +33,14 @@ def main(argv):
 		if ClientMessage == 'U' or ClientMessage == 'u':
 			file = open("/proc/uptime", 'rb')
 			content = file.read()
-			contentList = content.split()
+			contentList = content.split() # Make a list of every word in the file seperated by spaces
 			sendMsg = "Uptime: " + contentList[0] + " Idle: " + contentList[1]
 			print sendMsg
 			serverSocket.sendto(sendMsg, ClientAddress)
 		elif ClientMessage == 'L' or ClientMessage == 'l':
 			file = open("/proc/loadavg", 'rb')
 			content = file.read()
-			contentList = content.split()
+			contentList = content.split() # Make a list of every word in the file seperated by spaces
 			content1 = "CPU 1 minute: " + contentList[0] + "%\n"
 			content2 = "CPU 5 minutes: " + contentList[1] + "%\n"
 			content3 = "CPU 15 minutes: " + contentList[2] + "%\n"
@@ -51,7 +53,6 @@ def main(argv):
 		else: 
 			serverSocket.sendto('404 - Not Found', ClientAddress)
 			
-		#sendFile(sentence, file_size, connectionSocket)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
