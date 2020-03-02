@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-# Help: https://pymotw.com/2/socket/tcp.html
-# Help: https://www.bogotobogo.com/python/python_network_programming_server_client_file_transfer.php
-
 import sys
 from socket import *
 from lib import Lib
@@ -12,8 +9,7 @@ PORT = 9000
 BUFSIZE = 1024
 
 def main(argv):
-	# TO DO Your Code
-
+	
 	# Create a UDP socket
 	serverSocket = socket(AF_INET,SOCK_DGRAM)
 
