@@ -11,19 +11,19 @@ BUFSIZE = 1024
 
 def main(argv):
 	host = sys.argv[1]
-	file = sys.argv[2]
+	sendMsg = sys.argv[2]
 
 	# Create a UDP socket
 	clientSocket = socket(AF_INET, SOCK_DGRAM)
 	server_address = (host, PORT)
 
-	clientSocket.sendto(file, server_address)
+	clientSocket.sendto(sendMsg, server_address)
 
 	fromServer = clientSocket.recvfrom(BUFSIZE)
 
-	msg = "From Server: {}".format(fromServer[0])
+	rcvMsg = "From Server: {}".format(fromServer[0])
 
-	print msg
+	print rcvMsg
 
 if __name__ == "__main__":
    main(sys.argv[1:])
