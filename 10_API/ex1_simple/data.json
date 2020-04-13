@@ -1,0 +1,28 @@
+{
+    "data": [
+        {
+            "__class__": "Data",
+            "__module__": "__main__",
+            "dateTime": "2020-03-30T19:38:48",
+            "humidity": "30",
+            "id": 1,
+            "pressure": "20",
+            "temperature": "50"
+        },
+        {
+            "__class__": "Data",
+            "__module__": "__main__",
+            "dateTime": "2020-03-30T19:42:06",
+            "humidity": "30",
+            "id": 0,
+            "pressure": "20",
+            "temperature": "50"
+        },
+        {
+            "dateTime": "2020-04-13T13:23:03",
+            "humidity": "20",
+            "pressure": "10",
+            "temperature": "30"
+        }
+    ]
+}
