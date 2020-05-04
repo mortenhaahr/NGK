@@ -1,0 +1,104 @@
+{
+	"info": {
+		"_postman_id": "b4baf6a4-f8fa-482f-b57c-60be28ab5d1a",
+		"name": "NGK API Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Root get empty body",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "213b6a77-0f9f-4f83-b240-6ec17647fa74",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Returns JSON\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						""
+					]
+				},
+				"description": "Tester alt i forhold til at get. Forventer at få alt data returneret."
+			},
+			"response": []
+		},
+		{
+			"name": "Root get with body",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a088cf10-178c-443c-8edf-3c3410017468",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Returns JSON\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"JSON\": \"Træls\"\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/?Test=123",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "Test",
+							"value": "123",
+							"description": "Rip"
+						}
+					]
+				},
+				"description": "Tests get on localhost:5000/. Expects all the data in DB to be returned. The request body shouldn't matter, but the body includes data."
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
