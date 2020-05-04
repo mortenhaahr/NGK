@@ -7,13 +7,13 @@ testDbStatus = False
 testCollectionNames = False
 testCursor = False
 testCount = False
-testFilters = False
+testFilters = True
 testProjections = False
 testSort = False
 testRenameCollection = False
 testAggregation = False
 testLimitAndSkip = False
-testInsertAndDelete = True
+testInsertAndDelete = False
 
 # DB config:
 with open("config/db_config.json") as json_file:

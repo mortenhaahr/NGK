@@ -1,0 +1,4 @@
+
+{
+    "MONGO_DB_CONNECTION_STRING": "mongodb+srv://morten:xhE6JNBc05zCA8AJI5vPsZxI@cluster0-abb31.mongodb.net/test?retryWrites=true&w=majority"
+}
