@@ -1,3 +1,7 @@
+from pymongo import MongoClient, ASCENDING # Descending is used as a sort() specifier 
+from datetime import datetime, timedelta
+from math import floor
+
 def convertObjectId(id):
     if(isinstance(id, list)):
         try:
@@ -48,3 +52,17 @@ def isDate(datestr):
         return 0
     # Returns 1 if it is in correct format
     return 1
+
+def deleteOldTokens(JWTCol):
+    data = JWTCol.find().sort("exp", ASCENDING) # This doesnt sort the db itself
+    length = data.count()
+    currentTime = (datetime.utcnow()-datetime(1970,1,1)).total_seconds()
+    print("Current time: ", floor(currentTime))
+    while(length):
+        dataItem = data.next()
+        if(dataItem.get('exp') < currentTime):
+            JWTCol.delete_one({'_id': dataItem.get('_id')}) # Delete it
+            print("Deleted an old token from DB: ", dataItem)
+            length = length - 1 # Iterate down
+        else:
+            length = 0 # If the previous wasn't too old, the next ones wont be

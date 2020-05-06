@@ -1,12 +1,13 @@
 from datetime import datetime
+from math import floor
 
 class WeatherData:
 #Common base class for all data
 
-    def __init__(self,temperature, humidity, pressure):
-        self.temperature = temperature
-        self.humidity = humidity
-        self.pressure = pressure
+    def __init__(self, place, temperature, humidity, pressure):
+        self.temperature = floor(temperature*10)/10 # Round to 1 decimal
+        self.humidity = str(humidity + " %")
+        self.pressure = floor(pressure*10)/10 # Round to 1 decimal
         currentDateTime = datetime.now()
         self.dateTime = currentDateTime.strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -18,3 +19,9 @@ class WeatherData:
         objDict.update(self.__dict__)
 
         return objDict
+
+class Place:
+    def __init__(self, name, lat, lon):
+        self.name = name
+        self.lat = lat
+        self.lon = lon

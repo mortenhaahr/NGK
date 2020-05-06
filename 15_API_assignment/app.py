@@ -3,7 +3,7 @@
 from flask import Flask, request, jsonify, redirect, session, json, make_response
 from flask_bcrypt import generate_password_hash, check_password_hash
 import jwt
-import datetime
+from datetime import datetime, timedelta
 from pymongo import MongoClient, DESCENDING
 import re # regular expressions used in specific date endpoint
 from functools import wraps
@@ -11,7 +11,7 @@ from functools import wraps
 # Our files:
 from WeatherData import WeatherData
 from User import User
-from functions import convertObjectId, isDate
+from functions import convertObjectId, isDate, deleteOldTokens
 
 # DB config:
 with open("config/db_config.json") as json_file:
@@ -23,6 +23,7 @@ mongoClient = MongoClient(dbData['MONGO_DB_CONNECTION_STRING']) # load the clien
 mongoDb = mongoClient["NGKWeatherDB"]
 weatherCol = mongoDb["WeatherData"] # mongoCollection. 
 userCol = mongoDb["Users"]
+JWTCol = mongoDb["JWT"]
 
 def token_required(f):
 	@wraps(f)
@@ -31,7 +32,6 @@ def token_required(f):
 
 		if 'x-access-token' in request.headers:
 			token = request.headers['x-access-token']
-			print(token)
 
 		if not token:
 			return jsonify({'message' : 'Token is missing!'}), 401
@@ -39,7 +39,12 @@ def token_required(f):
 		try:
 			data = jwt.decode(token, app.config['SECRET_KEY'])
 			current_user = userCol.find({'public_id': data['public_id']}).next()
-			current_user = User(name=current_user.get('name'), password=current_user.get('password'), admin=current_user.get('admin'))
+
+			JWTObj = JWTCol.find({'token': token}).next()
+			if(not JWTObj.get('active')):
+				return jsonify({'message' : 'Using inactive token!'}), 401
+
+			current_user = User(name=current_user.get('name'), password=current_user.get('password'), admin=current_user.get('admin'), public_id = current_user.get('public_id'))
 		except:
 			return jsonify({'message' : 'Token is invalid!'}), 401
 
@@ -71,7 +76,7 @@ def create_user():
 	userDict = new_user.convertToDict()
 	userCol.insert_one(userDict)
 
-	return jsonify({"message" : "New user created!"})
+	return json.dumps({"message" : "New user created!"})
 
 @app.route('/login/', methods=['POST'])
 def login():
@@ -81,19 +86,24 @@ def login():
 		return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
 	user = userCol.find({"name": auth.username})
-	if(not list(user)):
+	if(not user.count()):
 		return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-	user.rewind()	
 	userDict = user.next()
 	
 	if not userDict:
 		return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
 	if check_password_hash(userDict.get('password'), auth.password):
-		token = jwt.encode({'public_id' : userDict.get('public_id'), 'iat' : datetime.datetime.utcnow(), 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+		tokenDict = {'public_id' : userDict.get('public_id'), 'iat' : datetime.utcnow(), 'exp' : datetime.utcnow() + timedelta(minutes=30)}
+		token = jwt.encode(tokenDict, app.config['SECRET_KEY'])
+		
+		tokenDict['active'] = True
+		tokenDict['token'] = token.decode('UTF-8')
 
-		return jsonify({'token' : token.decode('UTF-8')})
+		JWTCol.insert_one(tokenDict)
+
+		return json.dumps({'token' : token.decode('UTF-8')})
 	
 	return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
@@ -101,10 +111,23 @@ def login():
 @token_required
 def logout(current_user):
 
-	# TODO: Implement
+	idQuery = {'public_id': current_user.public_id}
+	inactiveQuery = {"$set": {"active" : False}}
+	JWTCol.update_many(idQuery, inactiveQuery) # Set all JWT with corresponding public_id to inactive.
 
 	return jsonify({'message' : 'Logged out!'}), 200
 
-if __name__ == '__main__':
+@app.route('/flush_tokens/', methods=['POST'])
+@token_required
+def flush_tokens(current_user):
+	if not current_user.admin:
+		return jsonify({'message' : 'Not allowed to do that function!'})
+
+	global JWTCol # Must be specified, since we reassign it below
+	JWTCol.drop()
+
+	return jsonify({'message' : 'Flushed JWT tokens!'}), 200
 	
+if __name__ == '__main__':
+	deleteOldTokens(JWTCol)
 	app.run(debug=True)
