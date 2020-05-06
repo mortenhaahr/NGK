@@ -27,7 +27,6 @@ def convertObjectId(id):
 
 def isDate(datestr):
     # Checks if the date is in format: YYYYMMDD
-
     if(not(len(datestr) == 8)): # Make sure it has correct length
         return 0
     year = int(datestr[0:4]) # Get first 4 letters of the string and convert it to a year
@@ -66,3 +65,11 @@ def deleteOldTokens(JWTCol):
             length = length - 1 # Iterate down
         else:
             length = 0 # If the previous wasn't too old, the next ones wont be
+
+def convertToUnixDates(dates):
+    convertedDates = []
+    for i in dates:
+        date = datetime(int(i[0:4]), int(i[4:6]), int(i[6:8]))
+        unixDate = floor((date-datetime(1970,1,1)).total_seconds())
+        convertedDates.append(unixDate)
+    return convertedDates

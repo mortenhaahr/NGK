@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from math import floor
 
 class WeatherData:
@@ -11,6 +11,7 @@ class WeatherData:
         self.pressure = floor(pressure*10)/10 # Round to 1 decimal
         currentDateTime = datetime.now()
         self.dateTime = currentDateTime.strftime("%Y-%m-%dT%H:%M:%S")
+        self.unixDateTime = str(floor((currentDateTime-datetime(1970,1,1)).total_seconds()))
 
     def convertToDict(self):
         # A function takes in a custom object and returns a dictionary representation of the object.
@@ -22,6 +23,7 @@ class WeatherData:
         objDict.update({"humidity": self.humidity})
         objDict.update({"press": self.pressure})
         objDict.update({"dateTime": self.dateTime})
+        objDict.update({"unixDateTime": self.unixDateTime})
 
         return objDict
 

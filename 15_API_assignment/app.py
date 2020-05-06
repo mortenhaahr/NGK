@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, jsonify, redirect, session, json, make_response
+from flask import Flask, request, jsonify, redirect, render_template, session, json, make_response
+from flask_socketio import SocketIO
 from flask_bcrypt import generate_password_hash, check_password_hash
 import jwt
 from datetime import datetime, timedelta
 from pymongo import MongoClient, DESCENDING
-import re # regular expressions used in specific date endpoint
 from functools import wraps
+from regex_engine import generator # Making regex patterns
+
+regenerator = generator()
 
 # Our files:
 from WeatherData import WeatherData, Place
 from User import User
-from functions import convertObjectId, isDate, deleteOldTokens
+from functions import convertObjectId, isDate, deleteOldTokens, convertToUnixDates
 
 # DB config:
 with open("config/db_config.json") as json_file:
@@ -19,6 +22,7 @@ with open("config/db_config.json") as json_file:
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'thisissecret'
+socketio = SocketIO(app)
 mongoClient = MongoClient(dbData['MONGO_DB_CONNECTION_STRING']) # load the client based on config file
 mongoDb = mongoClient["NGKWeatherDB"]
 weatherCol = mongoDb["WeatherData"] # mongoCollection. 
@@ -68,15 +72,15 @@ def get_all_users(current_user):
 
 @app.route('/user/', methods=['POST'])
 def create_user():
-
-	data = request.get_json()
-
-	hashed_password = generate_password_hash(data['password']) # Automatic salt
-	new_user = User(name=data['name'], password=hashed_password, admin=False)
-	userDict = new_user.convertToDict()
-	userCol.insert_one(userDict)
-
-	return jsonify({"message" : "New user created!"}), 200
+	try:
+		data = request.get_json()
+		hashed_password = generate_password_hash(data['password']) # Automatic salt
+		new_user = User(name=data['name'], password=hashed_password, admin=False)
+		userDict = new_user.convertToDict()
+		userCol.insert_one(userDict)
+		return jsonify({"message" : "New user created!"}), 200
+	except:
+		return jsonify({"message" : "Error in creating user."}), 400
 
 @app.route('/login/', methods=['POST'])
 def login():
@@ -148,9 +152,62 @@ def post_weather(current_user):
 	new_place = Place(name=data['place']['name'], lat=data['place']['lat'], lon=data['place']['lon'])
 	new_weather = WeatherData(place=new_place, temperature=data['temp'], humidity=data['humidity'], pressure=data['press'])
 	weatherDict = new_weather.convertToDict()
+
+	socketio.emit('new data', weatherDict)
+
 	weatherCol.insert_one(weatherDict)
+	
 
 	return jsonify({"message" : "Posted new weatherdata!"}), 200
+
+@app.route('/weather/', methods=['GET'])
+def get_weather():
+	weatherCursor = weatherCol.find().sort("dateTime", DESCENDING)
+	length = weatherCursor.count()
+	data = []
+	if(length < 3):
+		for i in weatherCursor:
+			data.append(i)
+	else:
+		for i in range(3):
+			data.append(weatherCursor.next())
+
+	for i in data:
+		i.pop('_id') # Remove ID because user doesnt need it.
+
+	return jsonify(data), 200
+
+@app.route('/weather/<date>/', methods=['GET'])
+def get_weather_specific(date):
+	if(isDate(date)):
+		date = date[0:4] + "-" + date[4:6] + "-" + date[6:8] # Fix the formatting to be the same as db
+		regex = f'^{date}' # Regex pattern to match all with same date as ours. Ignores the time
+		cursor = weatherCol.find({"dateTime": {'$regex': regex}})
+		listOfWeatherData = list(cursor) # return all the objects as a list and set the cursor to last index
+		for i in listOfWeatherData:
+			i.pop('_id') # Remove ID because user doesnt need it.
+
+		return jsonify(listOfWeatherData), 200
+	else:
+		return jsonify({"message": "Error in date. Write in format: yyyymmdd"}),400
+
+@app.route('/weather/<dateStart>/<dateEnd>/', methods=['GET'])
+def get_weather_interval(dateStart, dateEnd):
+	if(isDate(dateStart) and isDate(dateEnd)):
+		dates = convertToUnixDates([dateStart, dateEnd])
+		regex = regenerator.numerical_range(int(dates[0]), int(dates[1]))
+		cursor = weatherCol.find({"unixDateTime": {'$regex': regex}})
+		listOfWeatherData = list(cursor) # return all the objects as a list and set the cursor to last index
+		for i in listOfWeatherData:
+			i.pop('_id') # Remove ID because user doesnt need it.
+		return jsonify(listOfWeatherData), 200
+	else:
+		return jsonify({"message": "Error in date. Write in format: yyyymmdd"}),400	
+
+@app.route('/', methods=['GET'])
+def root():
+	return render_template('index.html')
+
 
 if __name__ == '__main__':
 	deleteOldTokens(JWTCol)
