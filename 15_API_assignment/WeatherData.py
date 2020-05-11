@@ -7,7 +7,7 @@ class WeatherData:
     def __init__(self, place, temperature, humidity, pressure):
         self.place = place
         self.temperature = floor(temperature*10)/10 # Round to 1 decimal
-        self.humidity = str(humidity) + " %"
+        self.humidity = str(floor(humidity*10)/10) + " %" # Round to 1 decimal and add %
         self.pressure = floor(pressure*10)/10 # Round to 1 decimal
         currentDateTime = datetime.now()
         self.dateTime = currentDateTime.strftime("%Y-%m-%dT%H:%M:%S")

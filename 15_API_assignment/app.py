@@ -8,8 +8,7 @@ from datetime import datetime, timedelta
 from pymongo import MongoClient, DESCENDING
 from functools import wraps
 from regex_engine import generator # Making regex patterns
-
-regenerator = generator()
+regenerator = generator() # regexgenerator
 
 # Our files:
 from WeatherData import WeatherData, Place
@@ -61,7 +60,7 @@ def token_required(f):
 def get_all_users(current_user):
 
 	if not current_user.admin:
-		return jsonify({'message' : 'Not allowed to do that function!'})
+		return jsonify({'message' : 'Not allowed to do that function!'}), 401
 
 	cursor = userCol.find() # make cursor with no sorting
 	listOfUserData = list(cursor) # return all the objects as a list and set the cursor to last index
@@ -87,17 +86,17 @@ def login():
 	auth = request.authorization
 
 	if not auth or not auth.username or not auth.password:
-		return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+		return make_response((jsonify({'msg': 'Could not verify'})), 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
 	user = userCol.find({"name": auth.username})
 	
 	if(not user.count()):
-		return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+		return make_response((jsonify({'msg': 'Could not verify'})), 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
 	userDict = user.next()
 	
 	if not userDict:
-		return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+		return make_response((jsonify({'msg': 'Could not verify'})), 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
 	if check_password_hash(userDict.get('password'), auth.password):
 		tokenDict = {'public_id' : userDict.get('public_id'), 'iat' : datetime.utcnow(), 'exp' : datetime.utcnow() + timedelta(minutes=30)}
@@ -126,7 +125,7 @@ def logout(current_user):
 @token_required
 def flush_tokens(current_user):
 	if not current_user.admin:
-		return jsonify({'message' : 'Not allowed to do that function!'})
+		return jsonify({'message' : 'Not allowed to do that function!'}), 401
 
 	global JWTCol # Must be specified, since we reassign it below
 	JWTCol.drop()
@@ -138,7 +137,8 @@ def flush_tokens(current_user):
 def post_weather(current_user):
 	data = request.get_json()
 
-	"""{
+	""" STRUCTURE:
+	{
 		"place": {
 			"name": "Aarhus",
 			"lat": 58.986462,

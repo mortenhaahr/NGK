@@ -1,0 +1,889 @@
+{
+	"info": {
+		"_postman_id": "37c1f334-5d12-4455-890d-599761326f72",
+		"name": "NGK API Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login-valid",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "514f5fa8-c416-4536-bbfa-a80b50d06290",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Returns JSON\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							"",
+							"// Making JWTs:",
+							"const adminUserLogin = {",
+							"    url: 'http://localhost:5000/login/',",
+							"    method: 'POST',",
+							"    auth: {",
+							"        \"type\": \"basic\",",
+							"        \"basic\": [",
+							"            { \"key\": \"username\", \"value\": \"morten\" },",
+							"            { \"key\": \"password\", \"value\": \"password1234\" }",
+							"        ]",
+							"    }",
+							"};",
+							"const normalUserLogin = {",
+							"    url: 'http://localhost:5000/login/',",
+							"    method: 'POST',",
+							"    auth: {",
+							"        \"type\": \"basic\",",
+							"        \"basic\": [",
+							"            { \"key\": \"username\", \"value\": \"thomas\" },",
+							"            { \"key\": \"password\", \"value\": \"1234password\" }",
+							"        ]",
+							"    }",
+							"};",
+							"",
+							"pm.sendRequest(adminUserLogin, function (err, res) {",
+							"    var adminData = res.json();",
+							"    pm.globals.set(\"admin-jwt\", adminData.token);",
+							"    //console.log(\"ADMIN TOKEN: \", adminData.token)",
+							"});",
+							"pm.sendRequest(normalUserLogin, function (err, res) {",
+							"    var userData = res.json();",
+							"    pm.globals.set(\"user-jwt\", userData.token);",
+							"    //console.log(\"USER TOKEN: \", userData.token)",
+							"});",
+							"pm.globals.set(\"invalid-jwt\", \"exJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwdWJsaWNfaWQiOiJjZDUwNTY0ZC0zM2M0LTRhZWItYjJiYS1jNjBmZjIyOWRjOGIiLCJpYXQiOjE1ODg3NzI5NDcsImV4cCI6MTU4ODc3NDc0N30.0n6-3OLfeK6Hbs0wWv3duiBm7GfuS4-Jt1m9BxuqSrk\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password1234",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "morten",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/login/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"login",
+						""
+					]
+				},
+				"description": "Logger ind med test account"
+			},
+			"response": []
+		},
+		{
+			"name": "Login-invalid",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e25048d6-f624-4766-9fb6-4e44771b739d",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"pm.test(\"Returns JSON\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "username",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/login/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"login",
+						""
+					]
+				},
+				"description": "Logger ind med test account"
+			},
+			"response": []
+		},
+		{
+			"name": "Get users - admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8cae9a4b-ffb9-4f91-aebd-2811a1717576",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"var jsonData;",
+							"",
+							"pm.test(\"Returns JSON\", function () {",
+							"    jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"//console.log(\"Returned data from 'Returns JSON':\");",
+							"//console.log(jsonData);",
+							"",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "515e97dd-0c9f-4a0d-9ffe-eb771b64de3f",
+						"exec": [
+							"pm.request.headers.add({",
+							"    // These keys appears when you set a header by hand. Just for fun they are here",
+							"    disabled: false,",
+							"    description: {",
+							"        content: \"Access Token\",",
+							"        type: \"text/plain\"",
+							"    },",
+							"    // Your header, effectively",
+							"    key: 'x-access-token',",
+							"    name: 'Get users',",
+							"    // If you set a variable you can access it",
+							"    // HeaderTest here has value=\"ValueHeaderTest\"",
+							"    value: pm.globals.get(\"admin-jwt\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/user/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get users - user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "353ceb48-9b5c-4fea-8be0-2c52400a2b45",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"",
+							"pm.test(\"Returns JSON\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ca98d609-958b-496c-a83e-2eb776f92504",
+						"exec": [
+							"pm.request.headers.add({",
+							"    // These keys appears when you set a header by hand. Just for fun they are here",
+							"    disabled: false,",
+							"    description: {",
+							"        content: \"Access Token\",",
+							"        type: \"text/plain\"",
+							"    },",
+							"    // Your header, effectively",
+							"    key: 'x-access-token',",
+							"    name: 'Get users',",
+							"    // If you set a variable you can access it",
+							"    // HeaderTest here has value=\"ValueHeaderTest\"",
+							"    value: pm.globals.get(\"user-jwt\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/user/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get users - invalid",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e2dce1f1-32ce-4bf4-8019-d41178cce2f6",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"",
+							"pm.test(\"Returns JSON\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "503223a0-b580-462d-8430-2502497c4446",
+						"exec": [
+							"pm.request.headers.add({ ",
+							"    // These keys appears when you set a header by hand. Just for fun they are here",
+							"    disabled: false,",
+							"    description:{",
+							"        content: \"Access Token\",",
+							"        type: \"text/plain\"",
+							"    },",
+							"    // Your header, effectively",
+							"    key: 'x-access-token', ",
+							"    name: 'Get users', ",
+							"    // If you set a variable you can access it",
+							"    // HeaderTest here has value=\"ValueHeaderTest\"",
+							"    value: pm.globals.get(\"invalid-jwt\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/user/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout-admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4d1540d5-7b08-49df-87dd-242878ccbc5d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Returns JSON\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0fc41162-c2a2-4d16-8283-51af17a10136",
+						"exec": [
+							"pm.request.headers.add({",
+							"    // These keys appears when you set a header by hand. Just for fun they are here",
+							"    disabled: false,",
+							"    description: {",
+							"        content: \"Access Token\",",
+							"        type: \"text/plain\"",
+							"    },",
+							"    // Your header, effectively",
+							"    key: 'x-access-token',",
+							"    name: 'Get users',",
+							"    // If you set a variable you can access it",
+							"    // HeaderTest here has value=\"ValueHeaderTest\"",
+							"    value: pm.globals.get(\"admin-jwt\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/logout/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"logout",
+						""
+					]
+				},
+				"description": "Logger ind med test account"
+			},
+			"response": []
+		},
+		{
+			"name": "Get users - signed out",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6d892302-8357-4ff4-8110-f26a759dab9e",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"var jsonData;",
+							"",
+							"pm.test(\"Returns JSON\", function () {",
+							"    jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"//console.log(\"Returned data from 'Returns JSON':\");",
+							"//console.log(jsonData);",
+							"",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9769d506-2a42-44cf-a472-9732346a619d",
+						"exec": [
+							"pm.request.headers.add({",
+							"    // These keys appears when you set a header by hand. Just for fun they are here",
+							"    disabled: false,",
+							"    description: {",
+							"        content: \"Access Token\",",
+							"        type: \"text/plain\"",
+							"    },",
+							"    // Your header, effectively",
+							"    key: 'x-access-token',",
+							"    name: 'Get users',",
+							"    // If you set a variable you can access it",
+							"    // HeaderTest here has value=\"ValueHeaderTest\"",
+							"    value: pm.globals.get(\"admin-jwt\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/user/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login-admin-again",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "92605119-6b16-434e-ae8c-8001bc6b86da",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Returns JSON\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							"",
+							"// Making JWTs:",
+							"const adminUserLogin = {",
+							"    url: 'http://localhost:5000/login/',",
+							"    method: 'POST',",
+							"    auth: {",
+							"        \"type\": \"basic\",",
+							"        \"basic\": [",
+							"            { \"key\": \"username\", \"value\": \"morten\" },",
+							"            { \"key\": \"password\", \"value\": \"password1234\" }",
+							"        ]",
+							"    }",
+							"};",
+							"const normalUserLogin = {",
+							"    url: 'http://localhost:5000/login/',",
+							"    method: 'POST',",
+							"    auth: {",
+							"        \"type\": \"basic\",",
+							"        \"basic\": [",
+							"            { \"key\": \"username\", \"value\": \"thomas\" },",
+							"            { \"key\": \"password\", \"value\": \"1234password\" }",
+							"        ]",
+							"    }",
+							"};",
+							"",
+							"pm.sendRequest(adminUserLogin, function (err, res) {",
+							"    var adminData = res.json();",
+							"    pm.globals.set(\"admin-jwt\", adminData.token);",
+							"    //console.log(\"ADMIN TOKEN: \", adminData.token)",
+							"});",
+							"pm.sendRequest(normalUserLogin, function (err, res) {",
+							"    var userData = res.json();",
+							"    pm.globals.set(\"user-jwt\", userData.token);",
+							"    //console.log(\"USER TOKEN: \", userData.token)",
+							"});",
+							"pm.globals.set(\"invalid-jwt\", \"exJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwdWJsaWNfaWQiOiJjZDUwNTY0ZC0zM2M0LTRhZWItYjJiYS1jNjBmZjIyOWRjOGIiLCJpYXQiOjE1ODg3NzI5NDcsImV4cCI6MTU4ODc3NDc0N30.0n6-3OLfeK6Hbs0wWv3duiBm7GfuS4-Jt1m9BxuqSrk\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password1234",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "morten",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/login/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"login",
+						""
+					]
+				},
+				"description": "Logger ind med test account"
+			},
+			"response": []
+		},
+		{
+			"name": "Get-latest-weather",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "660ae778-3b7b-43cf-a42f-ced0cb943a06",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"var jsonData;",
+							"",
+							"pm.test(\"Returns JSON\", function () {",
+							"    jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"//console.log(\"Returned data from 'Returns JSON':\");",
+							"//console.log(jsonData);",
+							"",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/weather/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"weather",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post-weather",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ee10f93c-ad5c-418c-8a26-8d11cf583fc9",
+						"exec": [
+							"pm.request.headers.add({",
+							"    // These keys appears when you set a header by hand. Just for fun they are here",
+							"    disabled: false,",
+							"    description: {",
+							"        content: \"Access Token\",",
+							"        type: \"text/plain\"",
+							"    },",
+							"    // Your header, effectively",
+							"    key: 'x-access-token',",
+							"    name: 'Get users',",
+							"    // If you set a variable you can access it",
+							"    // HeaderTest here has value=\"ValueHeaderTest\"",
+							"    value: pm.globals.get(\"admin-jwt\")",
+							"});",
+							"",
+							"// Make object:",
+							"var name = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);",
+							"var lat = Math.random()*180-90; // Random number from -90 to 90",
+							"var lon = Math.random()*260-180; // Random number from -180 to 80",
+							"var temp = Math.random()*150-90; // Random number from -90 to 60",
+							"var humidity = Math.random()*100; // Random number from 0 to 100",
+							"var pressure= Math.random()*300 + 900; // Random number from 900 - 1200",
+							"",
+							"var body = {",
+							"\t\t\"place\": {",
+							"\t\t\t\"name\": name,",
+							"\t\t\t\"lat\": lat,",
+							"\t\t\t\"lon\": lon",
+							"\t\t},",
+							"\t\t\"temp\": temp,",
+							"\t\t\"humidity\": humidity,",
+							"\t\t\"press\": pressure",
+							"}",
+							"",
+							"pm.environment.set('req_body', JSON.stringify(body));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "438b978a-ba7a-4f16-b1a6-4c56d5314045",
+						"exec": [
+							"",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Returns JSON\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "",
+						"type": "text",
+						"value": "",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{{req_body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/weather/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"weather",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get-latest-weather-again",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f9981e35-6246-4547-a524-b51a9002d663",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"var jsonData;",
+							"",
+							"pm.test(\"Returns JSON\", function () {",
+							"    jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"//console.log(\"Returned data from 'Returns JSON':\");",
+							"//console.log(jsonData);",
+							"",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/weather/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"weather",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get specific date",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "48e0f053-9b80-4394-b3e5-0854a5a980af",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"var jsonData;",
+							"",
+							"pm.test(\"Returns JSON\", function () {",
+							"    jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"//console.log(\"Returned data from 'Returns JSON':\");",
+							"//console.log(jsonData);",
+							"",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/weather/20200506/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"weather",
+						"20200506",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get interval",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "58d6f7c9-1e3a-4e35-b143-f27225b2be6d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"var jsonData;",
+							"",
+							"pm.test(\"Returns JSON\", function () {",
+							"    jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"//console.log(\"Returned data from 'Returns JSON':\");",
+							"//console.log(jsonData);",
+							"",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/weather/20200506/20200511/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"weather",
+						"20200506",
+						"20200511",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
