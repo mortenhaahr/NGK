@@ -149,16 +149,20 @@ def post_weather(current_user):
 		"press": 1030
 	}"""
 
-	new_place = Place(name=data['place']['name'], lat=data['place']['lat'], lon=data['place']['lon'])
-	new_weather = WeatherData(place=new_place, temperature=data['temp'], humidity=data['humidity'], pressure=data['press'])
-	weatherDict = new_weather.convertToDict()
+	try:
+		new_place = Place(name=data['place']['name'], lat=data['place']['lat'], lon=data['place']['lon'])
+		new_weather = WeatherData(place=new_place, temperature=data['temp'], humidity=data['humidity'], pressure=data['press'])
+		weatherDict = new_weather.convertToDict()
 
-	socketio.emit('new data', weatherDict)
+		socketio.emit('new data', weatherDict)
 
-	weatherCol.insert_one(weatherDict)
+		weatherCol.insert_one(weatherDict)
 	
 
-	return jsonify({"message" : "Posted new weatherdata!"}), 200
+		return jsonify({"message" : "Posted new weatherdata!"}), 200
+	except:
+		return jsonify({"message" : "Error in posting weatherdata!"}), 400
+	
 
 @app.route('/weather/', methods=['GET'])
 def get_weather():
@@ -194,6 +198,7 @@ def get_weather_specific(date):
 @app.route('/weather/<dateStart>/<dateEnd>/', methods=['GET'])
 def get_weather_interval(dateStart, dateEnd):
 	if(isDate(dateStart) and isDate(dateEnd)):
+		dateEnd = str(int(dateEnd)+1)
 		dates = convertToUnixDates([dateStart, dateEnd])
 		regex = regenerator.numerical_range(int(dates[0]), int(dates[1]))
 		cursor = weatherCol.find({"unixDateTime": {'$regex': regex}})

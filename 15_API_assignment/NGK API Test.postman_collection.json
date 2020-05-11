@@ -48,17 +48,20 @@
 							"    }",
 							"};",
 							"",
+							"console.log(\"Made following JWTs:\");",
 							"pm.sendRequest(adminUserLogin, function (err, res) {",
 							"    var adminData = res.json();",
 							"    pm.globals.set(\"admin-jwt\", adminData.token);",
-							"    //console.log(\"ADMIN TOKEN: \", adminData.token)",
+							"    console.log(\"ADMIN TOKEN: \", adminData.token);",
 							"});",
 							"pm.sendRequest(normalUserLogin, function (err, res) {",
 							"    var userData = res.json();",
 							"    pm.globals.set(\"user-jwt\", userData.token);",
-							"    //console.log(\"USER TOKEN: \", userData.token)",
+							"    console.log(\"USER TOKEN: \", userData.token);",
 							"});",
 							"pm.globals.set(\"invalid-jwt\", \"exJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwdWJsaWNfaWQiOiJjZDUwNTY0ZC0zM2M0LTRhZWItYjJiYS1jNjBmZjIyOWRjOGIiLCJpYXQiOjE1ODg3NzI5NDcsImV4cCI6MTU4ODc3NDc0N30.0n6-3OLfeK6Hbs0wWv3duiBm7GfuS4-Jt1m9BxuqSrk\");",
+							"",
+							"console.log(\"Invalid token\", pm.globals.get(\"invalid-jwt\"));",
 							""
 						],
 						"type": "text/javascript"
@@ -171,8 +174,8 @@
 							"    jsonData = pm.response.json();",
 							"    pm.expect(jsonData.value);",
 							"});",
-							"//console.log(\"Returned data from 'Returns JSON':\");",
-							"//console.log(jsonData);",
+							"console.log(\"Returned users:\");",
+							"console.log(jsonData);",
 							"",
 							"pm.test(\"Response time is less than 1s\", function () {",
 							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
@@ -450,8 +453,6 @@
 							"    jsonData = pm.response.json();",
 							"    pm.expect(jsonData.value);",
 							"});",
-							"//console.log(\"Returned data from 'Returns JSON':\");",
-							"//console.log(jsonData);",
 							"",
 							"pm.test(\"Response time is less than 1s\", function () {",
 							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
@@ -508,7 +509,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "92605119-6b16-434e-ae8c-8001bc6b86da",
+						"id": "20118895-c00d-45f3-b8f8-5c392ba65dc5",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -516,47 +517,11 @@
 							"pm.test(\"Returns JSON\", function () {",
 							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData.value);",
+							"    pm.globals.set(\"admin-jwt\", jsonData.token);",
 							"});",
 							"pm.test(\"Response time is less than 1s\", function () {",
 							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
-							"});",
-							"",
-							"// Making JWTs:",
-							"const adminUserLogin = {",
-							"    url: 'http://localhost:5000/login/',",
-							"    method: 'POST',",
-							"    auth: {",
-							"        \"type\": \"basic\",",
-							"        \"basic\": [",
-							"            { \"key\": \"username\", \"value\": \"morten\" },",
-							"            { \"key\": \"password\", \"value\": \"password1234\" }",
-							"        ]",
-							"    }",
-							"};",
-							"const normalUserLogin = {",
-							"    url: 'http://localhost:5000/login/',",
-							"    method: 'POST',",
-							"    auth: {",
-							"        \"type\": \"basic\",",
-							"        \"basic\": [",
-							"            { \"key\": \"username\", \"value\": \"thomas\" },",
-							"            { \"key\": \"password\", \"value\": \"1234password\" }",
-							"        ]",
-							"    }",
-							"};",
-							"",
-							"pm.sendRequest(adminUserLogin, function (err, res) {",
-							"    var adminData = res.json();",
-							"    pm.globals.set(\"admin-jwt\", adminData.token);",
-							"    //console.log(\"ADMIN TOKEN: \", adminData.token)",
-							"});",
-							"pm.sendRequest(normalUserLogin, function (err, res) {",
-							"    var userData = res.json();",
-							"    pm.globals.set(\"user-jwt\", userData.token);",
-							"    //console.log(\"USER TOKEN: \", userData.token)",
-							"});",
-							"pm.globals.set(\"invalid-jwt\", \"exJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwdWJsaWNfaWQiOiJjZDUwNTY0ZC0zM2M0LTRhZWItYjJiYS1jNjBmZjIyOWRjOGIiLCJpYXQiOjE1ODg3NzI5NDcsImV4cCI6MTU4ODc3NDc0N30.0n6-3OLfeK6Hbs0wWv3duiBm7GfuS4-Jt1m9BxuqSrk\");",
-							""
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -612,8 +577,8 @@
 							"    jsonData = pm.response.json();",
 							"    pm.expect(jsonData.value);",
 							"});",
-							"//console.log(\"Returned data from 'Returns JSON':\");",
-							"//console.log(jsonData);",
+							"console.log(\"Returned weather:\");",
+							"console.log(jsonData);",
 							"",
 							"pm.test(\"Response time is less than 1s\", function () {",
 							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
@@ -642,7 +607,7 @@
 			"response": []
 		},
 		{
-			"name": "Post-weather",
+			"name": "Post-weather-valid",
 			"event": [
 				{
 					"listen": "prerequest",
@@ -744,6 +709,100 @@
 			"response": []
 		},
 		{
+			"name": "Post-weather-invalid",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9c5b889d-8253-4565-a28d-c6f4550ceed5",
+						"exec": [
+							"pm.request.headers.add({",
+							"    // These keys appears when you set a header by hand. Just for fun they are here",
+							"    disabled: false,",
+							"    description: {",
+							"        content: \"Access Token\",",
+							"        type: \"text/plain\"",
+							"    },",
+							"    // Your header, effectively",
+							"    key: 'x-access-token',",
+							"    name: 'Get users',",
+							"    // If you set a variable you can access it",
+							"    // HeaderTest here has value=\"ValueHeaderTest\"",
+							"    value: pm.globals.get(\"admin-jwt\")",
+							"});",
+							"",
+							"var body = {",
+							"    \"planet\": {",
+							"        \"name\": \"earth\",",
+							"        \"lat\": \"10\",",
+							"        \"lon\": \"9\"",
+							"    },",
+							"    \"temp\": \"-x17321\",",
+							"    \"humidity\": \"xdas\",",
+							"    \"press\": \"pressure\"",
+							"}",
+							"",
+							"pm.environment.set('req_body', JSON.stringify(body));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "b28d9a6a-c77d-414c-9d76-45c80b1f529f",
+						"exec": [
+							"",
+							"",
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"pm.test(\"Returns JSON\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value);",
+							"});",
+							"pm.test(\"Response time is less than 1s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "",
+						"type": "text",
+						"value": "",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{{req_body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/weather/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"weather",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get-latest-weather-again",
 			"event": [
 				{
@@ -760,8 +819,8 @@
 							"    jsonData = pm.response.json();",
 							"    pm.expect(jsonData.value);",
 							"});",
-							"//console.log(\"Returned data from 'Returns JSON':\");",
-							"//console.log(jsonData);",
+							"console.log(\"Returned weather:\");",
+							"console.log(jsonData);",
 							"",
 							"pm.test(\"Response time is less than 1s\", function () {",
 							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
@@ -806,8 +865,8 @@
 							"    jsonData = pm.response.json();",
 							"    pm.expect(jsonData.value);",
 							"});",
-							"//console.log(\"Returned data from 'Returns JSON':\");",
-							"//console.log(jsonData);",
+							"console.log(\"Returned weather from 06.05.2020:\");",
+							"console.log(jsonData);",
 							"",
 							"pm.test(\"Response time is less than 1s\", function () {",
 							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
@@ -853,8 +912,8 @@
 							"    jsonData = pm.response.json();",
 							"    pm.expect(jsonData.value);",
 							"});",
-							"//console.log(\"Returned data from 'Returns JSON':\");",
-							"//console.log(jsonData);",
+							"console.log(\"Returned weather from 06.05.2020 - 07.05.2020:\");",
+							"console.log(jsonData);",
 							"",
 							"pm.test(\"Response time is less than 1s\", function () {",
 							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
@@ -869,7 +928,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:5000/weather/20200506/20200511/",
+					"raw": "localhost:5000/weather/20200506/20200507/",
 					"host": [
 						"localhost"
 					],
@@ -877,7 +936,7 @@
 					"path": [
 						"weather",
 						"20200506",
-						"20200511",
+						"20200507",
 						""
 					]
 				}
